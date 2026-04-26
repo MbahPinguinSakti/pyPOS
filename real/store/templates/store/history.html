@@ -1,0 +1,118 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {%include 'snippets/cdn.html'%}
+</head>
+
+<body>
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+      <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden m-4">☰</label>
+      <div class="p-6">
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+          <div class="container mx-auto">
+            <div class="card bg-base-200 shadow-xl">
+              <div class="card-body">
+                <!-- Header Stats -->
+                <div class="flex flex-wrap gap-4 mb-6">
+                  <h2 class="card-title text-2xl text-primary flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Riwayat Transaksi
+                  </h2>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div class="stat bg-base-300 rounded-box">
+                    <div class="stat-title">Total Penjualan</div>
+                    <div class="stat-value text-primary text-xl">Rp{{ total_sales|floatformat:0 }}</div>
+                  </div>
+                  <div class="stat bg-base-300 rounded-box">
+                    <div class="stat-title">Estimasi Keuntungan</div>
+                    <div class="stat-value text-success text-xl">Rp{{ profit|floatformat:0 }}</div>
+                  </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="table table-zebra w-full">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th class="text-left">ID Transaksi</th>
+                        <th class="text-right">Total</th>
+                        <th class="text-right">Pembayaran</th>
+                        <th class="text-right">Waktu</th>
+                        <th class="text-center">Aksi</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for item in transactions %}
+                      <tr class="hover:bg-base-300 transition-colors duration-200">
+                        <td class="font-medium">
+                          <div class="flex items-center gap-3">
+                            <div class="font-bold">{{item.id}}</div>
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="text-lg font-bold text-primary">
+                            Rp{{item.total_amount|floatformat:0}}
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="text-lg font-bold text-success">
+                            Rp{{item.payment_amount|floatformat:0}}
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="text-sm">
+                            {{item.timestamp|date:"d M Y H:i"}}
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <a href="{% url 'transaksi_detail' item.id %}" class="btn btn-xs btn-outline btn-primary">
+                            Detail
+                          </a>
+                        </td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                        <td colspan="5" class="text-center text-base-content/50 py-8">
+                          Belum ada transaksi.
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="card-actions justify-end mt-6">
+                  <a href="{% url 'product_create' %}" class="btn btn-primary">
+                    + Tambah Produk
+                  </a>
+                  <a href="{% url 'transaksi' %}" class="btn btn-secondary">
+                    🛒 Transaksi Baru
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-side">
+      <label for="my-drawer-2" class="drawer-overlay"></label>
+      {% include "snippets/navbar.html" %}
+    </div>
+  </div>
+</body>
+
+</html>

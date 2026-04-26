@@ -1,0 +1,125 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {%include 'snippets/cdn.html'%}
+</head>
+
+<body>
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+      <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden m-4">☰</label>
+      <!-- Main Content -->
+      <div class="p-6">
+        <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
+          <div class="container mx-auto">
+            <div class="card bg-base-200 shadow-xl">
+              <div class="card-body">
+                <h2 class="card-title text-2xl mb-6 text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  Product Inventory
+                </h2>
+
+                <div class="overflow-x-auto">
+                  <table class="table table-zebra w-full">
+                    <thead>
+                      <tr class="bg-base-300">
+                        <th class="text-left">Product Name</th>
+                        <th class="text-center">Stok Eceran</th>
+                        <th class="text-center">Stok Lusinan</th>
+                        <th class="text-center">Konversi</th>
+                        <th class="text-right">Harga Beli</th>
+                        <th class="text-right">Harga Jual</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for product in products %}
+                      <tr class="hover:bg-base-300 transition-colors duration-200">
+                        <td class="font-medium">
+                          <div class="flex items-center gap-3">
+                            <div>
+                              <div class="font-bold">{{product.name}}</div>
+                              <div class="text-sm opacity-50">SKU: {{product.id}}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <div
+                            class="badge badge-outline {% if product.stock_eceran > 50 %}badge-success{% elif product.stock_eceran > 20 %}badge-warning{% else %}badge-error{% endif %}">
+                            {{product.stock_eceran}} pcs
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <div
+                            class="badge badge-outline {% if product.stock_lusinan > 5 %}badge-success{% elif product.stock_lusinan > 2 %}badge-warning{% else %}badge-error{% endif %}">
+                            {{product.stock_lusinan}} box
+                          </div>
+                        </td>
+                        <td class="text-center">
+                          <span class="text-sm opacity-70">1 box = {{product.conversion_rate}} pcs</span>
+                        </td>
+                        <td class="text-right">
+                          <div class="text-lg font-bold text-secondary">
+                            Rp{{product.buy_price|floatformat:0}}
+                          </div>
+                        </td>
+                        <td class="text-right">
+                          <div class="text-lg font-bold text-primary">
+                            Rp{{product.price|floatformat:0}}
+                          </div>
+                        </td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                    <tfoot>
+                      <tr class="bg-base-300 font-bold">
+                        <th class="text-left">Total Products</th>
+                        <th class="text-center" colspan="5">{{products|length}} items</th>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Transactions -->
+          <div class="card bg-base-200 shadow-xl border border-base-300 mt-6">
+            <div class="card-body">
+              <h3 class="card-title text-lg flex items-center gap-2">
+                <span class="text-2xl">🕐</span>
+                <span>Transaksi Terbaru</span>
+              </h3>
+              <div class="space-y-2 mt-4">
+                {% for item in newest_transactions %}
+                <div class="flex justify-between items-center p-2 bg-base-100 rounded">
+                  <span class="text-sm font-bold">#{{item.id}}</span>
+                  <span class="badge badge-primary">Rp{{item.total_amount|floatformat:0}}</span>
+                  <span class="badge badge-ghost">{{item.timestamp|date:"d M Y H:i"}}</span>
+                </div>
+                {% empty %}
+                <p class="text-base-content/50 text-sm">Belum ada transaksi.</p>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-side">
+      <label for="my-drawer-2" class="drawer-overlay"></label>
+      {% include "snippets/navbar.html" %}
+    </div>
+  </div>
+</body>
+
+</html>

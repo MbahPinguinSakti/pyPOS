@@ -1,0 +1,219 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en" data-theme="dracula">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  {%include 'snippets/cdn.html'%}
+</head>
+
+<body>
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+    <div class="drawer-content flex flex-col">
+      <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden m-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+        Menu
+      </label>
+
+      <div class="p-6">
+        <div class="max-w-4xl mx-auto">
+          <!-- Header -->
+          <div class="mb-6">
+            <div class="breadcrumbs text-sm">
+              <ul>
+                <li><a href="{% url 'store_index' %}" class="text-primary">Dashboard</a></li>
+                <li><a href="{% url 'transaksi' %}" class="text-primary">Transaksi</a></li>
+                <li>Detail #{{ trx.id }}</li>
+              </ul>
+            </div>
+            <h1 class="text-3xl font-bold text-primary mt-2 flex items-center gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Struk Transaksi
+            </h1>
+          </div>
+
+          <!-- Transaction Header Card -->
+          <div class="card bg-base-200 shadow-xl mb-6">
+            <div class="card-body">
+              <div class="flex justify-between items-start mb-4">
+                <div>
+                  <h2 class="card-title text-2xl flex items-center gap-2">
+                    <span class="badge badge-primary badge-lg">#{{ trx.id }}</span>
+                    Detail Transaksi
+                  </h2>
+                  <p class="text-base-content/70 flex items-center gap-2 mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ trx.timestamp|date:"d F Y - H:i" }}
+                  </p>
+                </div>
+                <div class="flex gap-2">
+                  <button class="btn btn-outline btn-sm" onclick="window.print()">
+                    🖨️ Print
+                  </button>
+                  <button class="btn btn-secondary btn-sm" onclick="downloadReceipt()">
+                    📥 Download
+                  </button>
+                </div>
+              </div>
+
+              <!-- Payment Summary -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stat bg-base-300 rounded-box">
+                  <div class="stat-title">Total Belanja</div>
+                  <div class="stat-value text-primary text-2xl">
+                    Rp{{ trx.total_amount|floatformat:0 }}
+                  </div>
+                </div>
+                <div class="stat bg-base-300 rounded-box">
+                  <div class="stat-title">Pembayaran</div>
+                  <div class="stat-value text-success text-2xl">
+                    Rp{{ trx.payment_amount|floatformat:0 }}
+                  </div>
+                </div>
+                <div class="stat bg-base-300 rounded-box">
+                  <div class="stat-title">Kembalian</div>
+                  <div class="stat-value text-warning text-2xl">
+                    Rp{{ trx.change_amount|floatformat:0 }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Items Table -->
+          <div class="card bg-base-200 shadow-xl">
+            <div class="card-body">
+              <h2 class="card-title text-xl mb-4">
+                📋 Daftar Barang
+              </h2>
+
+              <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                  <thead>
+                    <tr class="bg-base-300">
+                      <th class="text-left">Produk</th>
+                      <th class="text-center">Tipe</th>
+                      <th class="text-center">Qty</th>
+                      <th class="text-right">Harga Satuan</th>
+                      <th class="text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for item in items %}
+                    <tr class="hover:bg-base-300 transition-colors duration-200">
+                      <td>
+                        <div class="flex items-center gap-3">
+                          <div class="avatar placeholder">
+                            <div class="bg-neutral text-neutral-content rounded-full w-10">
+                              <span class="text-sm">{{ item.product.name|slice:":1"|upper }}</span>
+                            </div>
+                          </div>
+                          <div>
+                            <div class="font-bold">{{ item.product.name }}</div>
+                            <div class="text-sm text-base-content/70">SKU: {{ item.product.id }}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <span
+                          class="badge {% if item.sale_type == 'lusinan' %}badge-secondary{% else %}badge-accent{% endif %}">
+                          {{ item.get_sale_type_display }}
+                        </span>
+                      </td>
+                      <td class="text-center">
+                        <div class="badge badge-outline badge-lg">
+                          {{ item.quantity }}
+                          <span class="text-xs ml-1">{% if item.sale_type == 'lusinan' %}box{% else %}pcs{% endif
+                            %}</span>
+                        </div>
+                      </td>
+                      <td class="text-right">
+                        <div class="font-semibold">Rp{{ item.price_at_sale|floatformat:0 }}</div>
+                      </td>
+                      <td class="text-right">
+                        <div class="font-bold text-lg text-success">Rp{{ item.subtotal|floatformat:0 }}</div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr class="bg-base-300 font-bold text-lg">
+                      <td colspan="4" class="text-right">Total:</td>
+                      <td class="text-right text-primary">Rp{{ trx.total_amount|floatformat:0 }}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-between items-center mt-6">
+            <a href="{% url 'transaksi' %}" class="btn btn-outline">
+              ← Kembali
+            </a>
+            <div class="flex gap-2">
+              <a href="{% url 'transaksi' %}" class="btn btn-primary">
+                + Transaksi Baru
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-side">
+      <label for="my-drawer-2" class="drawer-overlay"></label>
+      {% include "snippets/navbar.html" %}
+    </div>
+  </div>
+
+  <script>
+    function downloadReceipt() {
+      const receiptContent = `
+=================================
+        STRUK TRANSAKSI
+=================================
+Transaction ID: #{{ trx.id }}
+Tanggal: {{ trx.timestamp|date:"d F Y - H:i" }}
+=================================
+BARANG:
+{% for item in items %}{{ item.product.name }} ({{ item.get_sale_type_display }})
+Qty: {{ item.quantity }} x Rp{{ item.price_at_sale|floatformat:0 }}
+Subtotal: Rp{{ item.subtotal|floatformat:0 }}
+---------------------------------
+{% endfor %}
+=================================
+Total: Rp{{ trx.total_amount|floatformat:0 }}
+Bayar: Rp{{ trx.payment_amount|floatformat:0 }}
+Kembalian: Rp{{ trx.change_amount|floatformat:0 }}
+=================================
+        Terima kasih!
+=================================
+        `;
+      const blob = new Blob([receiptContent], { type: 'text/plain' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `struk_{{ trx.id }}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  </script>
+</body>
+
+</html>

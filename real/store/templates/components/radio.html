@@ -1,0 +1,4 @@
+<select name="{{ name|default:'' }}" class="neu-select {{ class|default:'' }}" {% if onchange
+    %}onchange="{{ onchange }}" {% endif %}>
+    {{ options|safe }}
+</select>

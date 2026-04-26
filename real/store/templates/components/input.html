@@ -1,0 +1,5 @@
+<input type="{{ type|default:'text' }}" name="{{ name|default:'' }}" id="{{ id|default:'' }}"
+    value="{{ value|default:'' }}" min="{{ min|default:'' }}" step="{{ step|default:'' }}"
+    placeholder="{{ placeholder|default:'' }}" class="neu-input {{ class|default:'' }}" {% if onchange
+    %}onchange="{{ onchange }}" {% endif %} {% if oninput %}oninput="{{ oninput }}" {% endif %} {% if data_price
+    %}data-price="{{ data_price }}" {% endif %} />

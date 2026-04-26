@@ -1,0 +1,6 @@
+<button type="{{ type|default:'button' }}"
+    class="neu-btn {% if variant == 'primary' %}neu-btn-primary{% elif variant == 'icon' %}neu-btn-icon{% endif %} {{ class|default:'' }}"
+    {% if onclick %}onclick="{{ onclick }}" {% endif %}>
+    {{ label|safe }}
+    {% if icon_svg %}{{ icon_svg|safe }}{% endif %}
+</button>
