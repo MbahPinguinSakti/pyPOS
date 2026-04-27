@@ -13,10 +13,7 @@
         <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
             <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden m-4">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
+                <i class="fa-solid fa-bars"></i>
                 Menu
             </label>
 
@@ -26,11 +23,7 @@
                     <!-- Header -->
                     <div class="mb-8">
                         <h1 class="text-3xl font-bold text-primary flex items-center gap-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0l-.5-3H3m4 15a2 2 0 100-4 2 2 0 000 4zm10 0a2 2 0 100-4 2 2 0 000 4z" />
-                            </svg>
+                            <i class="fa-solid fa-cart-shopping text-3xl"></i>
                             Checkout - Jual Barang
                         </h1>
                         <p class="text-base-content/70 mt-2">Pilih produk, tentukan tipe penjualan (eceran/lusinan),
@@ -44,11 +37,7 @@
                         <div class="card bg-base-200 shadow-xl mb-6">
                             <div class="card-body">
                                 <h2 class="card-title text-xl mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                    </svg>
+                                    <i class="fa-solid fa-box-open"></i>
                                     Pilih Produk
                                 </h2>
 
@@ -96,11 +85,7 @@
                                                     <div class="flex items-center justify-center gap-2">
                                                         <button type="button" class="btn btn-sm btn-circle btn-outline"
                                                             onclick="decreaseQuantity(this)">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M20 12H4" />
-                                                            </svg>
+                                                            <i class="fa-solid fa-minus"></i>
                                                         </button>
                                                         <input type="number" name="quantity" min="1" value="1"
                                                             class="input input-bordered input-sm w-20 text-center quantity-input"
@@ -108,11 +93,7 @@
                                                             onchange="updateSubtotal(this)" />
                                                         <button type="button" class="btn btn-sm btn-circle btn-outline"
                                                             onclick="increaseQuantity(this)">
-                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                                                            </svg>
+                                                            <i class="fa-solid fa-plus"></i>
                                                         </button>
                                                     </div>
                                                 </td>
@@ -143,11 +124,7 @@
                             <div class="card bg-base-200 shadow-xl">
                                 <div class="card-body">
                                     <h2 class="card-title text-xl mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
+                                        <i class="fa-solid fa-money-bill-wave"></i>
                                         Pembayaran
                                     </h2>
 
@@ -177,11 +154,7 @@
                             <div class="card bg-base-200 shadow-xl">
                                 <div class="card-body">
                                     <h2 class="card-title text-xl mb-4">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                        </svg>
+                                        <i class="fa-solid fa-list"></i>
                                         Ringkasan
                                     </h2>
 
@@ -213,19 +186,11 @@
                             <div class="card-body">
                                 <div class="card-actions justify-end">
                                     <button type="button" class="btn btn-outline" onclick="clearAll()">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
+                                        <i class="fa-solid fa-trash-can"></i>
                                         Bersihkan
                                     </button>
                                     <button type="submit" class="btn btn-primary btn-lg">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
+                                        <i class="fa-solid fa-money-bill-wave"></i>
                                         Proses Pembayaran
                                     </button>
                                 </div>
