@@ -54,13 +54,16 @@
                     <div>
                       <div class="font-bold">{{ product.name }}</div>
                       <div class="text-sm text-success font-semibold">
-                        Rp{{ product.price|floatformat:0 }}
+                        Rp{{ product.price|floatformat:0 }}/pcs
+                      </div>
+                      <div class="text-xs text-base-content/60">
+                        Rp{% widthratio product.price 1 product.conversion_rate %}/box ({{ product.conversion_rate }} pcs)
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="text-center">
-                  <select name="sale_type"
+                  <select name="sale_type_{{ product.id }}"
                     class="select select-bordered select-sm w-full sale-type-select"
                     onchange="updateSubtotal(this)">
                     <option value="eceran">Eceran</option>
@@ -73,9 +76,10 @@
                       onclick="decreaseQuantity(this)">
                       <i class="fa-solid fa-minus"></i>
                     </button>
-                    <input type="number" name="quantity" min="1" value="1"
+                    <input type="number" name="quantity_{{ product.id }}" min="1" value="1"
                       class="input input-bordered input-sm w-20 text-center quantity-input"
                       data-price="{{ product.price }}"
+                      data-conversion="{{ product.conversion_rate }}"
                       onchange="updateSubtotal(this)" />
                     <button type="button" class="btn btn-sm btn-circle btn-outline"
                       onclick="increaseQuantity(this)">
@@ -91,8 +95,7 @@
                   {% endwith %}
                 </td>
                 <td class="text-right">
-                  <div class="font-bold text-lg subtotal"
-                    data-price="{{ product.price }}">
+                  <div class="font-bold text-lg subtotal">
                     Rp0
                   </div>
                 </td>
@@ -193,12 +196,25 @@
 
 {% block extra_js %}
 <script>
+  let currentTotal = 0;
+
+  // Harga per unit sesuai tipe jual: lusinan = harga eceran x isi box.
+  function getUnitPrice(row) {
+    const quantityInput = row.querySelector('.quantity-input');
+    const price = parseFloat(quantityInput.dataset.price);
+    const saleType = row.querySelector('.sale-type-select').value;
+    if (saleType === 'lusinan') {
+      return price * parseInt(quantityInput.dataset.conversion);
+    }
+    return price;
+  }
+
   function updateSubtotal(element) {
     const row = element.closest('tr');
     const checkbox = row.querySelector('.product-checkbox');
     const quantityInput = row.querySelector('.quantity-input');
     const subtotalElement = row.querySelector('.subtotal');
-    const price = parseFloat(quantityInput.dataset.price);
+    const price = getUnitPrice(row);
 
     if (checkbox.checked) {
       const quantity = parseInt(quantityInput.value) || 1;
@@ -237,7 +253,7 @@
     document.querySelectorAll('.product-row').forEach(row => {
       const checkbox = row.querySelector('.product-checkbox');
       const quantityInput = row.querySelector('.quantity-input');
-      const price = parseFloat(quantityInput.dataset.price);
+      const price = getUnitPrice(row);
 
       if (checkbox.checked) {
         const quantity = parseInt(quantityInput.value) || 1;
@@ -246,6 +262,7 @@
       }
     });
 
+    currentTotal = totalAmount;
     document.getElementById('totalItems').textContent = totalItems;
     document.getElementById('totalAmount').textContent = `Rp${totalAmount.toLocaleString('id-ID')}`;
     document.getElementById('grandTotal').textContent = `Rp${totalAmount.toLocaleString('id-ID')}`;
@@ -254,18 +271,14 @@
   }
 
   function calculateChange() {
-    const totalText = document.getElementById('grandTotal').textContent;
-    const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, '')) || 0;
     const payment = parseFloat(document.getElementById('paymentInput').value) || 0;
-    const change = payment - totalAmount;
+    const change = payment - currentTotal;
 
     document.getElementById('changeAmount').textContent = `Rp${Math.max(0, change).toLocaleString('id-ID')}`;
   }
 
   function setExactAmount() {
-    const totalText = document.getElementById('grandTotal').textContent;
-    const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, '')) || 0;
-    document.getElementById('paymentInput').value = totalAmount;
+    document.getElementById('paymentInput').value = currentTotal;
     calculateChange();
   }
 

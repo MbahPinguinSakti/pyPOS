@@ -20,6 +20,18 @@ class Product(models.Model):
         """Total seluruh stok dalam satuan eceran."""
         return self.stock_eceran + (self.stock_lusinan * self.conversion_rate)
 
+    def unit_price(self, sale_type):
+        """Harga jual per unit sesuai tipe jual (per pcs atau per box)."""
+        if sale_type == 'lusinan':
+            return self.price * self.conversion_rate
+        return self.price
+
+    def unit_buy_price(self, sale_type):
+        """Harga beli per unit sesuai tipe jual (per pcs atau per box)."""
+        if sale_type == 'lusinan':
+            return self.buy_price * self.conversion_rate
+        return self.buy_price
+
 
 class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -41,8 +53,16 @@ class TransactionItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
     price_at_sale = models.DecimalField(max_digits=10, decimal_places=2)
+    buy_price_at_sale = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text="Harga beli per unit terjual (per pcs atau per box)"
+    )
     subtotal = models.DecimalField(max_digits=12, decimal_places=2)
     sale_type = models.CharField(max_length=10, choices=SALE_TYPE_CHOICES, default='eceran')
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} ({self.sale_type}) in Transaction #{self.transaction.id}"
+
+    @property
+    def profit(self):
+        return self.subtotal - (self.buy_price_at_sale * self.quantity)

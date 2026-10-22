@@ -105,8 +105,8 @@ class StoreViewsTest(TestCase):
     def test_sale_transaction_eceran_direct(self):
         data = {
             'product': [str(self.product.id)],
-            'quantity': ['3'],
-            'sale_type': ['eceran'],
+            f'quantity_{self.product.id}': '3',
+            f'sale_type_{self.product.id}': 'eceran',
             'payment': '20000',
         }
         response = self.client.post(reverse('transaksi'), data)
@@ -125,8 +125,8 @@ class StoreViewsTest(TestCase):
         # Box unpacked: 1 box removed, 12 added - 5 used = 7 eceran left.
         data = {
             'product': [str(self.product.id)],
-            'quantity': ['10'],
-            'sale_type': ['eceran'],
+            f'quantity_{self.product.id}': '10',
+            f'sale_type_{self.product.id}': 'eceran',
             'payment': '50000',
         }
         response = self.client.post(reverse('transaksi'), data)
@@ -140,9 +140,9 @@ class StoreViewsTest(TestCase):
     def test_sale_transaction_lusinan(self):
         data = {
             'product': [str(self.product.id)],
-            'quantity': ['2'],
-            'sale_type': ['lusinan'],
-            'payment': '10000',
+            f'quantity_{self.product.id}': '2',
+            f'sale_type_{self.product.id}': 'lusinan',
+            'payment': '120000',
         }
         response = self.client.post(reverse('transaksi'), data)
         trx = Transaction.objects.latest('id')
@@ -151,6 +151,59 @@ class StoreViewsTest(TestCase):
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_lusinan, 1)  # 3 - 2
         self.assertEqual(self.product.stock_eceran, 5)
+
+        # 1 box = 12 x Rp5.000, jadi 2 box = Rp120.000
+        item = trx.items.get()
+        self.assertEqual(item.price_at_sale, Decimal('60000.00'))
+        self.assertEqual(item.buy_price_at_sale, Decimal('48000.00'))
+        self.assertEqual(trx.total_amount, Decimal('120000.00'))
+        self.assertEqual(trx.change_amount, Decimal('0.00'))
+
+    def test_sale_only_checked_products(self):
+        other = Product.objects.create(
+            name="Aqua 600ml",
+            price=Decimal("3000.00"),
+            buy_price=Decimal("2000.00"),
+            stock_eceran=10,
+            stock_lusinan=0,
+            conversion_rate=24,
+        )
+        # Baris produk pertama ikut terkirim tapi tidak dicentang.
+        data = {
+            'product': [str(other.id)],
+            f'quantity_{self.product.id}': '1',
+            f'sale_type_{self.product.id}': 'eceran',
+            f'quantity_{other.id}': '4',
+            f'sale_type_{other.id}': 'eceran',
+            'payment': '12000',
+        }
+        self.client.post(reverse('transaksi'), data)
+        trx = Transaction.objects.latest('id')
+
+        item = trx.items.get()
+        self.assertEqual(item.product, other)
+        self.assertEqual(item.quantity, 4)
+        self.assertEqual(trx.total_amount, Decimal('12000.00'))
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.stock_eceran, 5)
+
+    def test_history_profit_uses_sold_items(self):
+        data = {
+            'product': [str(self.product.id)],
+            f'quantity_{self.product.id}': '3',
+            f'sale_type_{self.product.id}': 'eceran',
+            'payment': '15000',
+        }
+        self.client.post(reverse('transaksi'), data)
+        data[f'quantity_{self.product.id}'] = '1'
+        data[f'sale_type_{self.product.id}'] = 'lusinan'
+        data['payment'] = '60000'
+        self.client.post(reverse('transaksi'), data)
+
+        response = self.client.get(reverse('history_transactions'))
+        # Penjualan: 15.000 + 60.000; modal: 3 x 4.000 + 12 x 4.000
+        self.assertEqual(response.context['total_sales'], Decimal('75000.00'))
+        self.assertEqual(response.context['profit'], Decimal('15000.00'))
 
     def test_transaction_history_view(self):
         response = self.client.get(reverse('history_transactions'))

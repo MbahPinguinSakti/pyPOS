@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.db import transaction as db_transaction
-from django.db.models import Sum, F
+from django.db.models import DecimalField, F, Sum
 from decimal import Decimal
 
 from .models import Product, Transaction, TransactionItem
@@ -17,16 +17,11 @@ def _get_dashboard_context():
         Transaction.objects.aggregate(total=Sum('total_amount'))['total']
         or Decimal('0.00')
     )
-    total_buy_price = (
-        Product.objects.aggregate(total=Sum('buy_price'))['total']
-        or Decimal('0.00')
-    )
     newest_transactions = Transaction.objects.order_by('-timestamp')[:10]
 
     return {
         'products': products,
         'total_sales': total_sales,
-        'total_buy_price': total_buy_price,
         'newest_transactions': newest_transactions,
     }
 
@@ -80,20 +75,20 @@ def transactions(request):
         total = Decimal('0.00')
         item_data = []
 
-        product_ids = request.POST.getlist('product')
-        quantities = request.POST.getlist('quantity')
-        sale_types = request.POST.getlist('sale_type')
-
-        for product_id, qty, sale_type in zip(product_ids, quantities, sale_types):
+        # Field jumlah & tipe jual diberi nama per produk (quantity_<id>),
+        # karena checkbox yang tidak dicentang tidak ikut terkirim.
+        for product_id in request.POST.getlist('product'):
             product = get_object_or_404(Product, id=product_id)
-            quantity = int(qty)
-            price = product.price
+            quantity = int(request.POST.get(f'quantity_{product_id}', '1'))
+            sale_type = request.POST.get(f'sale_type_{product_id}', 'eceran')
+            price = product.unit_price(sale_type)
             subtotal = price * quantity
             total += subtotal
             item_data.append({
                 'product': product,
                 'quantity': quantity,
                 'price': price,
+                'buy_price': product.unit_buy_price(sale_type),
                 'subtotal': subtotal,
                 'sale_type': sale_type,
             })
@@ -150,6 +145,7 @@ def transactions(request):
                     product=product,
                     quantity=quantity,
                     price_at_sale=item['price'],
+                    buy_price_at_sale=item['buy_price'],
                     subtotal=item['subtotal'],
                     sale_type=sale_type,
                 )
@@ -170,7 +166,16 @@ def transaksi_detail(request, id):
 def transactions_history(request):
     """Show all past transactions."""
     ctx = _get_dashboard_context()
-    profit = ctx['total_sales'] - ctx['total_buy_price']
+    total_cost = (
+        TransactionItem.objects.aggregate(
+            total=Sum(
+                F('buy_price_at_sale') * F('quantity'),
+                output_field=DecimalField(max_digits=14, decimal_places=2),
+            )
+        )['total']
+        or Decimal('0.00')
+    )
+    profit = ctx['total_sales'] - total_cost
 
     return render(request, 'store/history.html', {
         'transactions': Transaction.objects.order_by('-timestamp'),
