@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Checkout Penjualan - pyPOS{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-primary flex items-center gap-3">
+      <i class="fa-solid fa-cart-shopping text-3xl"></i>
+      Checkout - Jual Barang
+    </h1>
+    <p class="text-base-content/70 mt-2">
+      Pilih produk, tentukan tipe penjualan (eceran/lusinan), lalu proses pembayaran
+    </p>
+  </div>
+
+  <form method="post" id="checkoutForm">
+    {% csrf_token %}
+
+    <!-- Products Section -->
+    <div class="card bg-base-200 shadow-xl mb-6">
+      <div class="card-body">
+        <h2 class="card-title text-xl mb-4">
+          <i class="fa-solid fa-box-open"></i>
+          Pilih Produk
+        </h2>
+
+        <div class="overflow-x-auto">
+          <table class="table table-zebra w-full">
+            <thead>
+              <tr class="bg-base-300">
+                <th class="w-16">Pilih</th>
+                <th>Produk</th>
+                <th class="text-center w-36">Tipe Jual</th>
+                <th class="text-center w-32">Qty</th>
+                <th class="text-center w-28">Stok</th>
+                <th class="text-right w-32">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in products %}
+              <tr class="hover:bg-base-300 transition-colors duration-200 product-row">
+                <td>
+                  <label class="label cursor-pointer">
+                    <input type="checkbox" name="product" value="{{ product.id }}"
+                      class="checkbox checkbox-primary product-checkbox"
+                      onchange="updateSubtotal(this)" />
+                  </label>
+                </td>
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div>
+                      <div class="font-bold">{{ product.name }}</div>
+                      <div class="text-sm text-success font-semibold">
+                        Rp{{ product.price|floatformat:0 }}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <select name="sale_type"
+                    class="select select-bordered select-sm w-full sale-type-select"
+                    onchange="updateSubtotal(this)">
+                    <option value="eceran">Eceran</option>
+                    <option value="lusinan">Lusinan</option>
+                  </select>
+                </td>
+                <td class="text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button type="button" class="btn btn-sm btn-circle btn-outline"
+                      onclick="decreaseQuantity(this)">
+                      <i class="fa-solid fa-minus"></i>
+                    </button>
+                    <input type="number" name="quantity" min="1" value="1"
+                      class="input input-bordered input-sm w-20 text-center quantity-input"
+                      data-price="{{ product.price }}"
+                      onchange="updateSubtotal(this)" />
+                    <button type="button" class="btn btn-sm btn-circle btn-outline"
+                      onclick="increaseQuantity(this)">
+                      <i class="fa-solid fa-plus"></i>
+                    </button>
+                  </div>
+                </td>
+                <td class="text-center">
+                  {% with se=product.stock_eceran sl=product.stock_lusinan %}
+                  <span class="badge badge-sm badge-outline">E: {{ se }}</span>
+                  <br>
+                  <span class="badge badge-sm badge-outline">L: {{ sl }}</span>
+                  {% endwith %}
+                </td>
+                <td class="text-right">
+                  <div class="font-bold text-lg subtotal"
+                    data-price="{{ product.price }}">
+                    Rp0
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center text-base-content/50 py-8">
+                  Belum ada produk untuk dijual. <a href="{% url 'product_create' %}" class="text-primary underline">Tambah produk</a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Payment Input -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-xl mb-4">
+            <i class="fa-solid fa-money-bill-wave"></i>
+            Pembayaran
+          </h2>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text font-semibold">Jumlah Bayar</span>
+            </label>
+            <div class="input-group">
+              <span class="bg-primary text-primary-content px-3 py-2.5 rounded items-center font-bold">Rp</span>
+              <input type="number" name="payment" step="1"
+                class="input input-bordered input-primary flex-1" placeholder="0"
+                id="paymentInput" oninput="calculateChange()" />
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <button type="button" class="btn btn-secondary btn-sm"
+              onclick="setExactAmount()">
+              Uang Pas
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="card bg-base-200 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title text-xl mb-4">
+            <i class="fa-solid fa-list"></i>
+            Ringkasan
+          </h2>
+
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span>Total Item:</span>
+              <span class="font-bold" id="totalItems">0</span>
+            </div>
+            <div class="flex justify-between text-lg">
+              <span>Subtotal:</span>
+              <span class="font-bold text-primary" id="totalAmount">Rp0</span>
+            </div>
+            <div class="divider"></div>
+            <div class="flex justify-between text-xl">
+              <span class="font-bold">Total:</span>
+              <span class="font-bold text-success" id="grandTotal">Rp0</span>
+            </div>
+            <div class="flex justify-between text-lg">
+              <span>Kembalian:</span>
+              <span class="font-bold text-warning" id="changeAmount">Rp0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="card bg-base-200 shadow-xl mt-6">
+      <div class="card-body">
+        <div class="card-actions justify-end">
+          <button type="button" class="btn btn-outline" onclick="clearAll()">
+            <i class="fa-solid fa-trash-can"></i>
+            Bersihkan
+          </button>
+          <button type="submit" class="btn btn-primary btn-lg">
+            <i class="fa-solid fa-money-bill-wave"></i>
+            Proses Pembayaran
+          </button>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function updateSubtotal(element) {
+    const row = element.closest('tr');
+    const checkbox = row.querySelector('.product-checkbox');
+    const quantityInput = row.querySelector('.quantity-input');
+    const subtotalElement = row.querySelector('.subtotal');
+    const price = parseFloat(quantityInput.dataset.price);
+
+    if (checkbox.checked) {
+      const quantity = parseInt(quantityInput.value) || 1;
+      const subtotal = price * quantity;
+      subtotalElement.textContent = `Rp${subtotal.toLocaleString('id-ID')}`;
+    } else {
+      subtotalElement.textContent = 'Rp0';
+      quantityInput.value = 1;
+    }
+
+    updateOrderSummary();
+  }
+
+  function increaseQuantity(button) {
+    const input = button.parentElement.querySelector('.quantity-input');
+    input.value = parseInt(input.value) + 1;
+    const checkbox = button.closest('tr').querySelector('.product-checkbox');
+    if (!checkbox.checked) {
+      checkbox.checked = true;
+    }
+    updateSubtotal(input);
+  }
+
+  function decreaseQuantity(button) {
+    const input = button.parentElement.querySelector('.quantity-input');
+    if (parseInt(input.value) > 1) {
+      input.value = parseInt(input.value) - 1;
+      updateSubtotal(input);
+    }
+  }
+
+  function updateOrderSummary() {
+    let totalItems = 0;
+    let totalAmount = 0;
+
+    document.querySelectorAll('.product-row').forEach(row => {
+      const checkbox = row.querySelector('.product-checkbox');
+      const quantityInput = row.querySelector('.quantity-input');
+      const price = parseFloat(quantityInput.dataset.price);
+
+      if (checkbox.checked) {
+        const quantity = parseInt(quantityInput.value) || 1;
+        totalItems += quantity;
+        totalAmount += price * quantity;
+      }
+    });
+
+    document.getElementById('totalItems').textContent = totalItems;
+    document.getElementById('totalAmount').textContent = `Rp${totalAmount.toLocaleString('id-ID')}`;
+    document.getElementById('grandTotal').textContent = `Rp${totalAmount.toLocaleString('id-ID')}`;
+
+    calculateChange();
+  }
+
+  function calculateChange() {
+    const totalText = document.getElementById('grandTotal').textContent;
+    const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, '')) || 0;
+    const payment = parseFloat(document.getElementById('paymentInput').value) || 0;
+    const change = payment - totalAmount;
+
+    document.getElementById('changeAmount').textContent = `Rp${Math.max(0, change).toLocaleString('id-ID')}`;
+  }
+
+  function setExactAmount() {
+    const totalText = document.getElementById('grandTotal').textContent;
+    const totalAmount = parseFloat(totalText.replace(/[^0-9.-]+/g, '')) || 0;
+    document.getElementById('paymentInput').value = totalAmount;
+    calculateChange();
+  }
+
+  function clearAll() {
+    document.querySelectorAll('.product-checkbox').forEach(cb => { cb.checked = false; });
+    document.querySelectorAll('.quantity-input').forEach(input => { input.value = 1; });
+    document.querySelectorAll('.subtotal').forEach(el => { el.textContent = 'Rp0'; });
+    document.querySelectorAll('.sale-type-select').forEach(sel => { sel.value = 'eceran'; });
+    document.getElementById('paymentInput').value = '';
+    updateOrderSummary();
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    updateOrderSummary();
+  });
+</script>
+{% endblock %}

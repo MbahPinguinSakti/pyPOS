@@ -1,0 +1,27 @@
+/* pyPOS Custom Styles */
+
+/* Print styling for receipts */
+@media print {
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .drawer-side,
+  .drawer-button,
+  .btn,
+  .breadcrumbs {
+    display: none !important;
+  }
+
+  .drawer-content {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+}

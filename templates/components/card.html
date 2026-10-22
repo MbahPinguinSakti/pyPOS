@@ -1,0 +1,11 @@
+<div class="card bg-base-200 shadow-xl {{ class|default:'' }}">
+  <div class="card-body">
+    {% if title %}
+    <h2 class="card-title text-xl mb-4 {{ title_class|default:'' }}">
+      {% if icon %}<i class="{{ icon }}"></i>{% endif %}
+      <span>{{ title }}</span>
+    </h2>
+    {% endif %}
+    {{ content|safe }}
+  </div>
+</div>

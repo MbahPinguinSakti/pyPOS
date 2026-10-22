@@ -4,40 +4,34 @@ __pycache__/
 *$py.class
 
 # Django files
-db.sqlite3
-db.sqlite3-journal
+*.sqlite3
+*.sqlite3-journal
 media/
-static/
 staticfiles/
+
+# Environment files
+.env
+.env.local
+.venv/
+venv/
+env/
+ENV/
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Virtual Environment
-venv/
-env/
-ENV/
-.env
-.venv
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Secret files (Sangat Penting!)
-.env
-local_settings.py
-secrets.json
-
-# IDE / Editor
+# IDE & Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# Testing & Logs
+# Testing & Coverage
+.coverage
+htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
 *.log
-.coverage
 .pytest_cache/

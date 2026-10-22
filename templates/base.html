@@ -1,0 +1,40 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id" data-theme="dracula">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}pyPOS - Point of Sale{% endblock %}</title>
+  {% include 'snippets/cdn.html' %}
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body class="min-h-screen bg-base-100">
+  <div class="drawer lg:drawer-open">
+    <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+
+    <div class="drawer-content flex flex-col">
+      <!-- Mobile Drawer Toggle Button -->
+      <label for="my-drawer-2" class="btn btn-primary drawer-button lg:hidden m-4 w-fit">
+        <i class="fa-solid fa-bars"></i>
+        <span>Menu</span>
+      </label>
+
+      <!-- Main Content Area -->
+      <main class="p-6">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+
+    <!-- Drawer Sidebar -->
+    <div class="drawer-side z-50">
+      <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label>
+      {% include 'snippets/navbar.html' %}
+    </div>
+  </div>
+
+  {% block extra_js %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,4 @@
+FROM Python:3.14.7
+
+
+WORKDIR /pyPOS
